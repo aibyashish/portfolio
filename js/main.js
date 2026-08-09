@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MAIN — nav behaviour, cursor glow, magnetic buttons, scroll reveal,
+   MAIN — nav behaviour, magnetic buttons, scroll reveal,
    pipeline progress, animated skill bars, current year.
    ========================================================================== */
 
@@ -31,31 +31,13 @@
     );
   }
 
-  /* ---------------- Cursor glow (desktop only, pointer: fine) ---------------- */
-  const glow = document.querySelector('.cursor-glow');
-  if (glow && !reduceMotion && window.matchMedia('(pointer: fine)').matches) {
-    let tx = 0, ty = 0, cx = 0, cy = 0;
-    window.addEventListener('mousemove', (e) => {
-      tx = e.clientX;
-      ty = e.clientY;
-      glow.style.opacity = '1';
-    });
-    (function animateGlow() {
-      cx += (tx - cx) * 0.12;
-      cy += (ty - cy) * 0.12;
-      glow.style.transform = `translate(${cx}px, ${cy}px) translate(-50%,-50%)`;
-      requestAnimationFrame(animateGlow);
-    })();
-  } else if (glow) {
-    glow.style.display = 'none';
-  }
-
-  /* ---------------- Card mouse-tracked glow (client cards) ---------------- */
-  document.querySelectorAll('.client-card').forEach((card) => {
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-      card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  document.querySelectorAll('a[href="#contact"]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const target = document.getElementById('contact');
+      if (target) {
+        event.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   });
 
@@ -138,4 +120,49 @@
   /* ---------------- Footer year ---------------- */
   const yearEl = document.querySelector('[data-year]');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  /* ---------------- Contact form submission ---------------- */
+  const contactForm = document.querySelector('.contact__form');
+  const contactStatus = document.querySelector('.contact__status');
+  if (contactForm && contactStatus) {
+    contactForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const submitButton = contactForm.querySelector('button[type="submit"]');
+      const originalLabel = submitButton ? submitButton.innerHTML : '';
+
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = 'Sending…';
+      }
+
+      contactStatus.textContent = '';
+      contactStatus.className = 'contact__status';
+
+      try {
+        const response = await fetch(contactForm.action, {
+          method: contactForm.method,
+          headers: { Accept: 'application/json' },
+          body: new FormData(contactForm)
+        });
+
+        if (response.ok) {
+          contactStatus.textContent = 'Thanks for reaching out. Your message is on its way and I’ll get back to you soon.';
+          contactStatus.classList.add('is-success');
+          contactForm.reset();
+        } else {
+          const data = await response.json().catch(() => null);
+          throw new Error(data?.errors?.[0]?.message || 'Message could not be sent. Please try again.');
+        }
+      } catch (error) {
+        contactStatus.textContent = error.message || 'Message could not be sent. Please try again.';
+        contactStatus.classList.add('is-error');
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalLabel;
+        }
+      }
+    });
+  }
 })();
