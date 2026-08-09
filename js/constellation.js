@@ -9,6 +9,9 @@
   const canvas = document.querySelector('[data-constellation]');
   if (!canvas) return;
 
+  // Disable the decorative constellation effect for a cleaner, faster hero experience.
+  return;
+
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ctx = canvas.getContext('2d');
   let width, height, dpr;

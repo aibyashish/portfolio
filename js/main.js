@@ -31,31 +31,44 @@
     );
   }
 
-  document.querySelectorAll('a[href="#contact"]').forEach((link) => {
+  /* ---------------- Magnetic buttons ---------------- */
+  // Disabled magnetic hover motion for a cleaner, faster experience.
+
+  /* ---------------- Smooth internal scrolling ---------------- */
+  const easeOutQuad = (t) => t * (2 - t);
+  const smoothScroll = (target, duration = 400) => {
+    const startY = window.scrollY;
+    const targetRect = target.getBoundingClientRect();
+    const targetY = startY + targetRect.top;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const finalY = Math.min(targetY, maxScroll);
+    const startTime = performance.now();
+
+    const step = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      window.scrollTo(0, startY + (finalY - startY) * easeOutQuad(progress));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    const href = link.getAttribute('href');
+    if (!href || href === '#' || href.startsWith('#!')) return;
+    const targetId = href.slice(1);
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
     link.addEventListener('click', (event) => {
-      const target = document.getElementById('contact');
-      if (target) {
-        event.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      event.preventDefault();
+      smoothScroll(target, 360);
+      if (navLinks && navLinks.classList.contains('is-open')) {
+        navLinks.classList.remove('is-open');
+        navToggle?.setAttribute('aria-expanded', 'false');
       }
     });
   });
-
-  /* ---------------- Magnetic buttons ---------------- */
-  if (!reduceMotion && window.matchMedia('(pointer: fine)').matches) {
-    document.querySelectorAll('.magnetic').forEach((el) => {
-      const strength = 18;
-      el.addEventListener('mousemove', (e) => {
-        const rect = el.getBoundingClientRect();
-        const relX = e.clientX - rect.left - rect.width / 2;
-        const relY = e.clientY - rect.top - rect.height / 2;
-        el.style.transform = `translate(${(relX / rect.width) * strength}px, ${(relY / rect.height) * strength}px)`;
-      });
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'translate(0,0)';
-      });
-    });
-  }
 
   /* ---------------- Scroll reveal ---------------- */
   const revealEls = document.querySelectorAll('[data-reveal]');

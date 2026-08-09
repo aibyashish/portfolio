@@ -153,17 +153,17 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible{
 /* reveal-on-scroll base state */
 [data-reveal]{
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
+  transform: translateY(20px);
+  transition: opacity 0.42s var(--ease-out), transform 0.42s var(--ease-out);
 }
 [data-reveal].is-visible{
   opacity: 1;
   transform: translateY(0);
 }
-[data-reveal-delay="1"]{ transition-delay: 0.08s; }
-[data-reveal-delay="2"]{ transition-delay: 0.16s; }
-[data-reveal-delay="3"]{ transition-delay: 0.24s; }
-[data-reveal-delay="4"]{ transition-delay: 0.32s; }
+[data-reveal-delay="1"]{ transition-delay: 0.05s; }
+[data-reveal-delay="2"]{ transition-delay: 0.1s; }
+[data-reveal-delay="3"]{ transition-delay: 0.15s; }
+[data-reveal-delay="4"]{ transition-delay: 0.2s; }
 
 @media (prefers-reduced-motion: reduce){
   [data-reveal]{ opacity: 1; transform: none; }
